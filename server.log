@@ -1,0 +1,20 @@
+nohup: ignoring input
+ * Serving Flask app 'main'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://169.254.0.21:5002
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 898-606-933
+127.0.0.1 - - [23/Jun/2025 07:25:36] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jun/2025 07:25:36] "GET /static/logo.png HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jun/2025 07:25:36] "GET /api/pendencias/count HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jun/2025 07:25:36] "GET /favicon.ico HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jun/2025 07:25:47] "GET /api/funcionarios?q=João HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jun/2025 07:25:58] "GET /api/materiais?q=parafuso HTTP/1.1" 200 -
+ * Detected change in '/home/ubuntu/almoxarifado_project/src/main.py', reloading
+ * Restarting with stat
+/usr/bin/python3: can't open file '/home/ubuntu/almoxarifado_project/main.py': [Errno 2] No such file or directory
