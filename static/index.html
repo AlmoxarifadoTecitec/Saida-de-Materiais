@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Saída de Materiais</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #34495e;
+            --secondary-color: #e74c3c;
+            --accent-color: #2ecc71;
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow-light);
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 5px solid var(--secondary-color);
+        }
+
+        .header img {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .pendencias-badge {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 15px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            height: auto;
+            box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
+            animation: pulse 2s infinite;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-button i {
+            margin-right: 8px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-color);
+            background-color: var(--card-bg);
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background-color: #f9f9f9;
+        }
+
+        .tab-content {
+            padding: 25px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: calc(100% - 20px);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .search-results {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 5px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 12px var(--shadow-light);
+            display: none;
+            z-index: 1000;
+            position: relative;
+        }
+
+        .search-result-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+            font-size: 0.95em;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .no-results {
+            padding: 15px;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background-color: #2c3e50;
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-danger {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: var(--accent-color);
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            border-radius: 5px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f0f0f0;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-badge i {
+            margin-right: 5px;
+        }
+
+        .status-pendente {
+            background-color: #f39c12;
+            color: #fff;
+        }
+
+        .status-concluida {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: var(--border-color);
+        }
+
+        .empty-state h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .alert {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            border-left: 5px solid;
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .alert-success {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .alert-error {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                max-width: calc(100vw - 20px);
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.3em;
+                margin-top: 10px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header .pendencias-badge {
+                margin-left: 0;
+                margin-top: 10px;
+                font-size: 0.8em;
+                padding: 4px 8px;
+                min-width: 60px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1;
+                min-width: 120px;
+                font-size: 0.9em;
+                padding: 12px 5px;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .tab-button.active {
+                border-bottom: 3px solid var(--primary-color);
+            }
+
+            .tab-content {
+                padding: 15px;
+                overflow-x: hidden;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table {
+                min-width: 600px;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px;
+                font-size: 0.85em;
+                white-space: nowrap;
+            }
+
+            .btn {
+                width: 100%;
+                margin-top: 10px;
+                font-size: 0.9em;
+            }
+
+            .btn-small {
+                width: auto;
+                margin: 2px;
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .form-group input[type="text"],
+            .form-group input[type="number"],
+            .form-group textarea {
+                width: calc(100% - 16px);
+                padding: 10px 8px;
+                font-size: 0.9em;
+            }
+
+            .search-results {
+                max-height: 150px;
+            }
+
+            .search-result-item {
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.1em;
+            }
+
+            .tab-button {
+                font-size: 0.8em;
+                padding: 10px 3px;
+            }
+
+            .tab-content {
+                padding: 10px;
+            }
+
+            .table th,
+            .table td {
+                padding: 6px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/static/logo.png" alt="Logo da Empresa">
+            <h1>Registro de Saída <span id="pendencias-badge" class="pendencias-badge">⚠️ <span id="pendencias-count">0</span> Pendências</span></h1>
+        </div>
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'registro')"><i class="fas fa-plus-circle"></i> Registro de Retirada</button>
+            <button class="tab-button" onclick="openTab(event, 'pendencias')"><i class="fas fa-clock"></i> Pendências</button>
+            <button class="tab-button" onclick="openTab(event, 'historico')"><i class="fas fa-history"></i> Histórico</button>
+        </div>
+
+        <div id="registro" class="tab-content">
+            <form id="retirada-form">
+                <div class="form-group">
+                    <label for="funcionario-search">Funcionário:</label>
+                    <input type="text" id="funcionario-search" placeholder="Buscar funcionário..." autocomplete="off">
+                    <input type="hidden" id="funcionario-id" required>
+                    <div id="funcionario-results" class="search-results"></div>
+                </div>
+                <div class="form-group">
+                    <label for="quantidade">Quantidade:</label>
+                    <input type="number" id="quantidade" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="material-search">Material:</label>
+                    <input type="text" id="material-search" placeholder="Buscar material..." autocomplete="off">
+                    <input type="hidden" id="material-id" required>
+                    <div id="material-results" class="search-results"></div>
+                </div>
+                <div class="form-group">
+                    <label for="observacao">Observação:</label>
+                    <textarea id="observacao" placeholder="Observações adicionais..."></textarea>
+                </div>
+                <button type="submit" class="btn"><i class="fas fa-box"></i> Registrar Retirada</button>
+            </form>
+        </div>
+
+        <div id="pendencias" class="tab-content" style="display:none;">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <button class="btn btn-danger" onclick="apagarTodasPendencias()"><i class="fas fa-trash"></i> Apagar Todas</button>
+            </div>
+            <div class="table-responsive">
+                <div id="pendencias-content">
+                    <!-- Pendências serão carregadas aqui -->
+                </div>
+            </div>
+        </div>
+
+        <div id="historico" class="tab-content" style="display:none;">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <button class="btn btn-danger" onclick="limparHistorico()"><i class="fas fa-history"></i> Limpar Histórico</button>
+            </div>
+            <div class="table-responsive">
+                <div id="historico-content">
+                    <!-- Histórico será carregado aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <script>
+        // Tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            // Load content based on tab
+            if (tabName === 'pendencias') {
+                loadPendencias();
+            } else if (tabName === 'historico') {
+                loadHistorico();
+            }
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updatePendenciasCount();
+            // Open the first tab by default
+            document.querySelector('.tab-button').click();
+        });
+
+        // Search functions
+        async function searchFuncionarios(query) {
+            if (query.length < 2) {
+                document.getElementById("funcionario-results").style.display = "none";
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/funcionarios?q=${query}`);
+                const funcionarios = await response.json();
+                const resultsDiv = document.getElementById("funcionario-results");
+                resultsDiv.innerHTML = "";
+                
+                // Filtrar funcionários que contenham o texto digitado
+                const filteredFuncionarios = funcionarios.filter(funcionario => 
+                    funcionario.apelido.toLowerCase().includes(query.toLowerCase()) ||
+                    funcionario.nome.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 10); // Limitar a 10 resultados
+                
+                if (filteredFuncionarios.length > 0) {
+                    filteredFuncionarios.forEach(funcionario => {
+                        const div = document.createElement("div");
+                        div.textContent = `${funcionario.apelido} - ${funcionario.nome}`;
+                        div.onclick = () => selectFuncionario(funcionario);
+                        div.className = "search-result-item";
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.style.display = "block";
+                } else {
+                    resultsDiv.innerHTML = '<div class="no-results">Nenhum funcionário encontrado</div>';
+                    resultsDiv.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Erro na busca de funcionários:", error);
+                document.getElementById("funcionario-results").style.display = "none";
+            }
+        }
+
+        function selectFuncionario(funcionario) {
+            document.getElementById("funcionario-search").value = `${funcionario.apelido} - ${funcionario.nome}`;
+            document.getElementById("funcionario-id").value = funcionario.id;
+            document.getElementById("funcionario-results").style.display = "none";
+        }
+
+        async function searchMaterials(query) {
+            if (query.length < 2) {
+                document.getElementById("material-results").style.display = "none";
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/materiais?q=${query}`);
+                const materiais = await response.json();
+                const resultsDiv = document.getElementById("material-results");
+                resultsDiv.innerHTML = "";
+                
+                // Filtrar materiais que contenham o texto digitado
+                const filteredMateriais = materiais.filter(material => 
+                    material.codigo.toLowerCase().includes(query.toLowerCase()) ||
+                    material.item.toLowerCase().includes(query.toLowerCase())
+                ).slice(0, 10); // Limitar a 10 resultados
+                
+                if (filteredMateriais.length > 0) {
+                    filteredMateriais.forEach(material => {
+                        const div = document.createElement("div");
+                        div.textContent = `${material.codigo} - ${material.item}`;
+                        div.onclick = () => selectMaterial(material);
+                        div.className = "search-result-item";
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.style.display = "block";
+                } else {
+                    resultsDiv.innerHTML = '<div class="no-results">Nenhum material encontrado</div>';
+                    resultsDiv.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Erro na busca de materiais:", error);
+                document.getElementById("material-results").style.display = "none";
+            }
+        }
+
+        function selectMaterial(material) {
+            document.getElementById("material-search").value = `${material.codigo} - ${material.item}`;
+            document.getElementById("material-id").value = material.id;
+            document.getElementById("material-results").style.display = "none";
+        }
+
+        // Form submission
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const funcionarioId = document.getElementById("funcionario-id").value;
+            const materialId = document.getElementById("material-id").value;
+            const quantidade = document.getElementById("quantidade").value;
+            const observacao = document.getElementById("observacao").value;
+
+            if (!funcionarioId || !materialId || !quantidade) {
+                showAlert("Por favor, preencha todos os campos obrigatórios (Funcionário, Material, Quantidade).", "error");
+                return;
+            }
+
+            const formData = {
+                funcionario_id: funcionarioId,
+                material_id: materialId,
+                quantidade: quantidade,
+                observacao: observacao
+            };
+
+            try {
+                const response = await fetch("/api/retiradas", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert("Retirada registrada com sucesso!", "success");
+                    document.getElementById("retirada-form").reset();
+                    document.getElementById("funcionario-id").value = "";
+                    document.getElementById("material-id").value = "";
+                    updatePendenciasCount();
+                } else {
+                    showAlert(result.message || "Erro ao registrar retirada", "error");
+                }
+            } catch (error) {
+                console.error("Erro ao registrar retirada:", error);
+                showAlert("Erro ao registrar retirada", "error");
+            }
+        }
+
+        // Load pendencias
+        async function loadPendencias() {
+            try {
+                const response = await fetch("/api/retiradas?status=pendente");
+                const pendencias = await response.json();
+                const pendenciasContent = document.getElementById("pendencias-content");
+                pendenciasContent.innerHTML = "";
+
+                if (pendencias.length === 0) {
+                    pendenciasContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Nenhuma retirada pendente</h3>
+                            <p>Todas as retiradas foram concluídas ou não há pendências no momento.</p>
+                        </div>
+                    `;
+                } else {
+                    const table = document.createElement("table");
+                    table.className = "table";
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Funcionário</th>
+                                <th>Material</th>
+                                <th>Qtd</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    `;
+                    const tbody = table.querySelector("tbody");
+
+                    pendencias.forEach(pendencia => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${new Date(pendencia.data_retirada).toLocaleString()}</td>
+                            <td>${pendencia.funcionario_apelido || pendencia.funcionario_nome}</td>
+                            <td>${pendencia.material_codigo} - ${pendencia.material_item}</td>
+                            <td>${pendencia.quantidade}</td>
+                            <td>${pendencia.observacao || "-"}</td>
+                            <td>
+                                <button class="btn btn-success btn-small" onclick="concluirRetirada(${pendencia.id})">
+                                    <i class="fas fa-check"></i> Concluir
+                                </button>
+                                <button class="btn btn-danger btn-small" onclick="apagarRetirada(${pendencia.id})">
+                                    <i class="fas fa-trash"></i> Apagar
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    pendenciasContent.appendChild(table);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar pendências:", error);
+                document.getElementById("pendencias-content").innerHTML = `<div class="alert alert-error">Erro ao carregar pendências: ${error.message}</div>`;
+            }
+        }
+
+        // Load historico
+        async function loadHistorico() {
+            try {
+                const response = await fetch("/api/retiradas?status=all");
+                const historico = await response.json();
+                const historicoContent = document.getElementById("historico-content");
+                historicoContent.innerHTML = "";
+
+                if (historico.length === 0) {
+                    historicoContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <h3>Nenhum histórico de retirada</h3>
+                            <p>Nenhuma retirada foi registrada ainda.</p>
+                        </div>
+                    `;
+                } else {
+                    const table = document.createElement("table");
+                    table.className = "table";
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Funcionário</th>
+                                <th>Material</th>
+                                <th>Qtd</th>
+                                <th>Observação</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    `;
+                    const tbody = table.querySelector("tbody");
+
+                    historico.forEach(item => {
+                        const row = document.createElement("tr");
+                        const statusClass = item.status === "pendente" ? "status-pendente" : "status-concluida";
+                        const statusIcon = item.status === "pendente" ? "fas fa-clock" : "fas fa-check";
+                        row.innerHTML = `
+                            <td>${new Date(item.data_retirada).toLocaleString()}</td>
+                            <td>${item.funcionario_apelido || item.funcionario_nome}</td>
+                            <td>${item.material_codigo} - ${item.material_item}</td>
+                            <td>${item.quantidade}</td>
+                            <td>${item.observacao || "-"}</td>
+                            <td><span class="status-badge ${statusClass}"><i class="${statusIcon}"></i> ${item.status}</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    historicoContent.appendChild(table);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar histórico:", error);
+                document.getElementById("historico-content").innerHTML = `<div class="alert alert-error">Erro ao carregar histórico: ${error.message}</div>`;
+            }
+        }
+
+        // Update pendencias count
+        async function updatePendenciasCount() {
+            try {
+                const response = await fetch("/api/pendencias/count");
+                const data = await response.json();
+                const badge = document.getElementById("pendencias-badge");
+                const countSpan = document.getElementById("pendencias-count");
+                countSpan.textContent = data.count;
+
+                if (data.count === 0) {
+                    badge.style.display = "none";
+                } else {
+                    badge.style.display = "flex";
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar contagem de pendências:", error);
+                document.getElementById("pendencias-badge").style.display = "none"; // Hide badge on error
+            }
+        }
+
+        // Concluir retirada
+        async function concluirRetirada(id) {
+            if (confirm("Tem certeza que deseja marcar esta retirada como concluída?")) {
+                try {
+                    const response = await fetch(`/api/retiradas/${id}/concluir`, {
+                        method: "PUT"
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showAlert("Retirada concluída com sucesso!", "success");
+                        loadPendencias();
+                        loadHistorico();
+                        updatePendenciasCount();
+                    } else {
+                        showAlert(result.message || "Erro ao concluir retirada", "error");
+                    }
+                } catch (error) {
+                    console.error("Erro ao concluir retirada:", error);
+                    showAlert("Erro ao concluir retirada", "error");
+                }
+            }
+        }
+
+        // Apagar retirada
+        async function apagarRetirada(id) {
+            if (confirm("Tem certeza que deseja apagar esta retirada? Esta ação é irreversível.")) {
+                try {
+                    const response = await fetch(`/api/retiradas/${id}`, {
+                        method: "DELETE"
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showAlert("Retirada apagada com sucesso!", "success");
+                        loadPendencias();
+                        loadHistorico();
+                        updatePendenciasCount();
+                    } else {
+                        showAlert(result.message || "Erro ao apagar retirada", "error");
+                    }
+                } catch (error) {
+                    console.error("Erro ao apagar retirada:", error);
+                    showAlert("Erro ao apagar retirada", "error");
+                }
+            }
+        }
+
+        // Apagar todas as pendências
+        async function apagarTodasPendencias() {
+            if (confirm("Tem certeza que deseja apagar TODAS as retiradas pendentes? Esta ação é irreversível.")) {
+                try {
+                    const response = await fetch("/api/retiradas/apagar-todas-pendencias", {
+                        method: "DELETE"
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showAlert("Todas as pendências foram apagadas com sucesso!", "success");
+                        loadPendencias();
+                        loadHistorico();
+                        updatePendenciasCount();
+                    } else {
+                        showAlert(result.message || "Erro ao apagar todas as pendências", "error");
+                    }
+                } catch (error) {
+                    console.error("Erro ao apagar todas as pendências:", error);
+                    showAlert("Erro ao apagar todas as pendências", "error");
+                }
+            }
+        }
+
+        // Limpar histórico
+        async function limparHistorico() {
+            if (confirm("Tem certeza que deseja limpar todo o histórico de retiradas concluídas? Esta ação é irreversível.")) {
+                try {
+                    const response = await fetch("/api/retiradas/limpar-historico", {
+                        method: "DELETE"
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showAlert("Histórico limpo com sucesso!", "success");
+                        loadHistorico();
+                        updatePendenciasCount();
+                    } else {
+                        showAlert(result.message || "Erro ao limpar histórico", "error");
+                    }
+                } catch (error) {
+                    console.error("Erro ao limpar histórico:", error);
+                    showAlert("Erro ao limpar histórico", "error");
+                }
+            }
+        }
+
+        // Show alert messages
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById("alert-container");
+            const alertDiv = document.createElement("div");
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-info-circle"></i> ${message}
+            `;
+            alertContainer.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById("retirada-form").addEventListener("submit", handleFormSubmit);
+            
+            // Event listener para busca de funcionários com debounce
+            let funcionarioTimeout;
+            document.getElementById("funcionario-search").addEventListener("input", function() {
+                const query = this.value.trim();
+                clearTimeout(funcionarioTimeout);
+                funcionarioTimeout = setTimeout(() => {
+                    if (query.length >= 2) {
+                        searchFuncionarios(query);
+                    } else {
+                        document.getElementById("funcionario-results").style.display = "none";
+                    }
+                }, 300); // Debounce de 300ms
+            });
+            
+            // Event listener para busca de materiais com debounce
+            let materialTimeout;
+            document.getElementById("material-search").addEventListener("input", function() {
+                const query = this.value.trim();
+                clearTimeout(materialTimeout);
+                materialTimeout = setTimeout(() => {
+                    if (query.length >= 2) {
+                        searchMaterials(query);
+                    } else {
+                        document.getElementById("material-results").style.display = "none";
+                    }
+                }, 300); // Debounce de 300ms
+            });
+            
+            // Fechar listas de busca quando clicar fora
+            document.addEventListener("click", function(e) {
+                if (!e.target.closest(".form-group")) {
+                    document.getElementById("funcionario-results").style.display = "none";
+                    document.getElementById("material-results").style.display = "none";
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
+
+
+
