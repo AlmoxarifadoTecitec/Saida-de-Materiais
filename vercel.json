@@ -35,11 +35,13 @@
       "dest": "/api/retiradas.py"
     },
     {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }
   ]
 }
-
-
 
